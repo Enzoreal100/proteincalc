@@ -6,17 +6,33 @@ const proteins = [
     { id: 'ground-beef', name: 'Carne moída', ratio: 0.26, correction: 1.35 }
 ];
 
-const PURE_PROTEIN_GOAL = 938;
-const PROTEIN_LIMIT = PURE_PROTEIN_GOAL * 1.05; // 5% margin
-
 const inputs = proteins.map(p => document.getElementById(p.id));
 const calculateBtn = document.getElementById('calculate-btn');
 const clearBtn = document.getElementById('clear-btn');
 const errorMessage = document.getElementById('error-message');
+const proteinGoalInput = document.getElementById('protein-goal');
+
+// Load saved values
+inputs.forEach(input => {
+    const saved = localStorage.getItem(input.id);
+    if (saved) input.value = saved;
+});
+
+// Load saved protein goal
+const savedGoal = localStorage.getItem('protein-goal');
+if (savedGoal) proteinGoalInput.value = savedGoal;
+
+// Save protein goal on change
+proteinGoalInput.addEventListener('input', () => {
+    localStorage.setItem('protein-goal', proteinGoalInput.value);
+});
 
 function calculateValues() {
     errorMessage.textContent = '';
     errorMessage.className = '';
+    
+    const proteinGoal = parseFloat(proteinGoalInput.value) || 938;
+    const proteinLimit = proteinGoal * 1.05;
     
     // Get inputs with values > 0
     const filledInputs = inputs.filter(input => parseFloat(input.value) > 0);
@@ -31,20 +47,20 @@ function calculateValues() {
         totalProteinFromFilled += cookedValue * protein.ratio;
     });
     
-    if (totalProteinFromFilled > PROTEIN_LIMIT) {
+    if (totalProteinFromFilled > proteinLimit) {
         errorMessage.textContent = `Valores de proteína acima do esperado: ${totalProteinFromFilled.toFixed(1)}g`;
         errorMessage.className = 'error';
         return;
     }
     
-    if (totalProteinFromFilled > PURE_PROTEIN_GOAL) {
+    if (totalProteinFromFilled > proteinGoal) {
         errorMessage.textContent = `Aviso: Proteína ligeiramente acima da meta: ${totalProteinFromFilled.toFixed(1)}g`;
         errorMessage.className = 'warning';
     }
     
     if (emptyInputs.length === 0) return;
     
-    const remainingProtein = PURE_PROTEIN_GOAL - totalProteinFromFilled;
+    const remainingProtein = proteinGoal - totalProteinFromFilled;
     
     if (remainingProtein <= 0) return;
     
@@ -57,11 +73,17 @@ function calculateValues() {
         const rawGrams = cookedGrams * protein.correction;
         input.value = Math.max(0, rawGrams).toFixed(1);
     });
+    
+    // Save all values
+    inputs.forEach(input => localStorage.setItem(input.id, input.value));
 }
 
 calculateBtn.addEventListener('click', calculateValues);
 clearBtn.addEventListener('click', () => {
-    inputs.forEach(input => input.value = '');
+    inputs.forEach(input => {
+        input.value = '';
+        localStorage.removeItem(input.id);
+    });
     errorMessage.textContent = '';
     errorMessage.className = '';
 });
