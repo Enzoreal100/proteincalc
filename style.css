@@ -46,6 +46,13 @@ button:hover {
     background-color: #0056b3;
 }
 
+#error-message {
+    color: #dc3545;
+    font-weight: bold;
+    margin: 1rem 0;
+    text-align: center;
+}
+
 /* Responsive styles for larger screens */
 @media (min-width: 600px) {
     main {
