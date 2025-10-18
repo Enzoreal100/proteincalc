@@ -16,6 +16,7 @@ const errorMessage = document.getElementById('error-message');
 
 function calculateValues() {
     errorMessage.textContent = '';
+    errorMessage.className = '';
     
     // Get inputs with values > 0
     const filledInputs = inputs.filter(input => parseFloat(input.value) > 0);
@@ -32,7 +33,13 @@ function calculateValues() {
     
     if (totalProteinFromFilled > PROTEIN_LIMIT) {
         errorMessage.textContent = `Valores de proteína acima do esperado: ${totalProteinFromFilled.toFixed(1)}g`;
+        errorMessage.className = 'error';
         return;
+    }
+    
+    if (totalProteinFromFilled > PURE_PROTEIN_GOAL) {
+        errorMessage.textContent = `Aviso: Proteína ligeiramente acima da meta: ${totalProteinFromFilled.toFixed(1)}g`;
+        errorMessage.className = 'warning';
     }
     
     if (emptyInputs.length === 0) return;
@@ -56,4 +63,5 @@ calculateBtn.addEventListener('click', calculateValues);
 clearBtn.addEventListener('click', () => {
     inputs.forEach(input => input.value = '');
     errorMessage.textContent = '';
+    errorMessage.className = '';
 });
