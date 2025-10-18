@@ -9,42 +9,39 @@ const proteins = [
 const PURE_PROTEIN_GOAL = 938;
 
 const inputs = proteins.map(p => document.getElementById(p.id));
+const calculateBtn = document.getElementById('calculate-btn');
+const clearBtn = document.getElementById('clear-btn');
 
-function updateValues(event) {
-    const updatedId = event.target.id;
-    const updatedRawValue = parseFloat(event.target.value) || 0;
-
-    const updatedProtein = proteins.find(p => p.id === updatedId);
-
-    // Convert raw weight input to cooked weight for calculation
-    const cookedValue = updatedRawValue / updatedProtein.correction;
-    const pureProteinFromSource = cookedValue * updatedProtein.ratio;
-
-    if (pureProteinFromSource >= PURE_PROTEIN_GOAL) {
-        inputs.forEach(input => {
-            if (input.id !== updatedId) {
-                input.value = 0;
-            }
-        });
-        return;
-    }
-
-    const remainingProtein = PURE_PROTEIN_GOAL - pureProteinFromSource;
-    const otherProteins = proteins.filter(p => p.id !== updatedId);
-    const otherInputs = inputs.filter(input => input.id !== updatedId);
-
-    const proteinShare = remainingProtein / otherProteins.length;
-
-    otherInputs.forEach((input, index) => {
-        const protein = otherProteins[index];
-        // Calculate the cooked grams needed
+function calculateValues() {
+    // Get inputs with values > 0
+    const filledInputs = inputs.filter(input => parseFloat(input.value) > 0);
+    const emptyInputs = inputs.filter(input => !input.value || parseFloat(input.value) === 0);
+    
+    if (emptyInputs.length === 0) return; // No empty fields to fill
+    
+    // Calculate total protein from filled inputs
+    let totalProteinFromFilled = 0;
+    filledInputs.forEach(input => {
+        const protein = proteins.find(p => p.id === input.id);
+        const rawValue = parseFloat(input.value);
+        const cookedValue = rawValue / protein.correction;
+        totalProteinFromFilled += cookedValue * protein.ratio;
+    });
+    
+    const remainingProtein = PURE_PROTEIN_GOAL - totalProteinFromFilled;
+    
+    if (remainingProtein <= 0) return; // Goal already met
+    
+    // Distribute remaining protein among empty inputs
+    const proteinShare = remainingProtein / emptyInputs.length;
+    
+    emptyInputs.forEach(input => {
+        const protein = proteins.find(p => p.id === input.id);
         const cookedGrams = proteinShare / protein.ratio;
-        // Convert back to raw grams for display in the input field
         const rawGrams = cookedGrams * protein.correction;
         input.value = Math.max(0, rawGrams).toFixed(1);
     });
 }
 
-inputs.forEach(input => {
-    input.addEventListener('input', updateValues);
-});
+calculateBtn.addEventListener('click', calculateValues);
+clearBtn.addEventListener('click', () => inputs.forEach(input => input.value = ''));
