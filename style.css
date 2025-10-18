@@ -30,6 +30,22 @@ input {
     box-sizing: border-box;
 }
 
+button {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    border: none;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
 /* Responsive styles for larger screens */
 @media (min-width: 600px) {
     main {
